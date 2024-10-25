@@ -25,7 +25,7 @@
 			rmt.onerror = function() {
 				const lcl = document.createElement("script");
 				lcl.onerror = null;
-				lcl.src = "./p5.min.js";
+				lcl.src = "p5.min.js";
 				document.head.appendChild(lcl);
 			};
 			document.head.appendChild(rmt);
@@ -84,10 +84,19 @@ function preload() {
 
 function setup() {
 
-	createCanvas(540, 960).parent("contenedor-canvas");
-	setTimeout(() => adaptarCanvas(), 11); // resize y responsive
+	// medidas viewport
+	const vpt_w = window.innerWidth;
+	const vpt_h = window.innerHeight;
+
+	// calculo canvas
+	const cnv_w = 540; // mitad de 1080
+	const cnv_h = cnv_w * vpt_h / vpt_w;
+
+	createCanvas(cnv_w, cnv_h).parent("contenedor-canvas");
+	setTimeout(() => adaptarExterior(), 1); // resize y responsive
 
 	imgFondo.width = width;
+	if (height > 980) offsetAcc = 980 - height;
 
 	background(255);
 	textAlign(CENTER, CENTER);
@@ -232,37 +241,37 @@ function touchEnded() {
 
 /////////////////////////
 
-function adaptarCanvas() {
+function adaptarInterior() {
+	
+	const vpt_w = window.innerWidth;
+	const vpt_h = window.innerHeight;
 
-	// tipo de viewport
-	const visual = window.visualViewport ? true : false;
-  
-	// medidas viewport
-	const vpt_w = visual ? window.visualViewport.width : window.innerWidth;
-	const vpt_h = visual ? window.visualViewport.height : window.innerHeight;
-
-	// calculo canvas
 	const cnv_w = 540; // mitad de 1080
 	const cnv_h = cnv_w * vpt_h / vpt_w;
 
-	// elementos del dom
-  const main = document.getElementById("contenedor-canvas");
-	const cnvs = document.getElementById("defaultCanvas0");
-	
-	// resize
 	resizeCanvas(cnv_w, cnv_h);
 	if (height > 980) offsetAcc = 980 - height;
 
-	// responsive
-	main.style.width = visual ? "100svw" : "100vw";
-	main.style.height = visual ? "100svh" : "100vh";
+	adaptarExterior();
+}
+
+/////////////////////////
+
+function adaptarExterior() {
+
+  const main = document.getElementById("contenedor-canvas");
+	const cnvs = document.getElementById("defaultCanvas0");
+
+	main.style.width = "100vw";
+	main.style.height = "100vh";
+	
   if (windowWidth * height > windowHeight * width) {
-    cnvs.style.height = visual ? "100svh" : "100vh";
-    cnvs.style.width = (100 / height) * width + (visual ? "svh" : "vh");
+    cnvs.style.height = "100vh";
+    cnvs.style.width = (100 / height) * width + "vh";
   }
   else {
-    cnvs.style.width = visual ? "100svw" : "100vw";
-    cnvs.style.height = (100 / width) * height + (visual ? "svw" : "vw");
+    cnvs.style.width = "100vw";
+    cnvs.style.height = (100 / width) * height + "vw";
   }
 }
 
@@ -272,7 +281,7 @@ function adaptarCanvas() {
 window.addEventListener('load', function() {
 
 	// cambio de dimensiones en ventana
-  window.addEventListener('resize', () => adaptarCanvas());
+  window.addEventListener('resize', () => adaptarInterior());
 
 	// prevenir default touch
 	document.addEventListener('touchstart', function(e) {
