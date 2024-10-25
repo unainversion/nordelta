@@ -264,7 +264,7 @@ function adaptarExterior() {
 
 	main.style.width = "100vw";
 	main.style.height = "100vh";
-	
+
   if (windowWidth * height > windowHeight * width) {
     cnvs.style.height = "100vh";
     cnvs.style.width = (100 / height) * width + "vh";
@@ -280,8 +280,12 @@ function adaptarExterior() {
 // eventos
 window.addEventListener('load', function() {
 
-	// cambio de dimensiones en ventana
+	// cambio de dimensiones
   window.addEventListener('resize', () => adaptarInterior());
+
+	// cambio de fullscreen
+	document.addEventListener("fullscreenchange", () => adaptarInterior());
+	document.addEventListener("webkitfullscreenchange", () => adaptarInterior());
 
 	// prevenir default touch
 	document.addEventListener('touchstart', function(e) {
