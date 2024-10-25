@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Nordelta</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+		<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'>
+		<style> .cs { stroke: rgb(9, 9, 9); stroke-width: 2; } </style>
+		<style> .bl { fill: rgb(255, 255, 255); } </style>
+		<style> .ng { fill: rgb(0, 0, 0); } </style>
+		<circle cx='30' cy='30' r='30' class='cs ng'/>
+		<circle cx='30' cy='30' r='10' class='cs bl'/>
+		<circle cx='10' cy='30' r='10' class='cs bl'/>
+		<circle cx='50' cy='30' r='10' class='cs bl'/>
+		<circle cx='40' cy='12.67' r='10' class='cs bl'/>
+		<circle cx='20' cy='12.67' r='10' class='cs bl'/>
+		<circle cx='40' cy='47.32' r='10' class='cs bl'/>
+		<circle cx='20' cy='47.32' r='10' class='cs bl'/> 
+		</svg>">
+
+		<script>
+			const rmt = document.createElement("script");
+			rmt.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js";
+			rmt.onerror = function() {
+				const lcl = document.createElement("script");
+				lcl.onerror = null;
+				lcl.src = "./p5.min.js";
+				document.head.appendChild(lcl);
+			};
+			document.head.appendChild(rmt);
+		</script>
+
+		<style>
+			html, body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				box-sizing: border-box;
+				background-color: rgb(255, 255, 255);
+  			touch-action: manipulation;
+				user-select: none;
+			}
+
+			#contenedor-canvas {
+				width: 100vw;
+				width: 100svw;
+				height: 100vh;
+				height: 100svh;
+
+				display: flex;
+  			justify-content: center;
+  			align-items: center;
+
+				background-color: rgb(255, 255, 255);;
+			}
+		 </style>
+  </head>
+
+  <body>
+    <main id="contenedor-canvas">
+    </main>
+    <script>
+
+/////////////////////////////////////////////
+
+let imgFondo, imgDcto;
+
+let inicio = true;
+
+let touch = false;
+let entrada_x, entrada_y;
+
+let scroll = 0;
+let offset = 0;
+let offsetAcc = 0;
+
+/////////////////////////
+
+function preload() {
+	imgFondo = loadImage("fondo.png");
+	imgDscto = loadImage("dscto.png");
+}
+
+function setup() {
+
+	createCanvas(540, 960).parent("contenedor-canvas");
+	setTimeout(() => adaptarCanvas(), 11); // resize y responsive
+
+	imgFondo.width = width;
+
+	background(255);
+	textAlign(CENTER, CENTER);
+	textSize(14);
+	noStroke();
+}
+
+/////////////////////////
+
+function draw() {
+	
+	// captura touch
+	if (touch) offset = entrada_y - mouseY;
+	else offset = 0;
+
+	scroll = offset + offsetAcc;
+	if (scroll < -500) {
+		scroll = -500;
+		offsetAcc = -500;
+	}
+
+	// dibujos
+	if (inicio) dibujoInicio();
+	else dibujoSpam();
+}
+
+/////////////////////////
+
+function dibujoInicio() {
+	
+	// fondo principal
+	background(255);
+
+	image(imgFondo, 0, -scroll);
+	
+	push();
+	tint(255, (sin(millis() * 0.004) + 1) * 127);
+	image(imgDscto, 270, 764 - scroll);
+	pop();
+	
+	if (scroll < 600) return;
+	image(imgFondo, 0, imgFondo.height - scroll);
+}
+
+/////////////////////////
+
+function dibujoSpam() {
+	background(0, 255, 255, 10);
+
+	const rx = random(width);
+	const ry = random(height);
+	const rr = random(-PI, PI);
+	const rs = random(0.5, 5);
+
+	push();
+	translate(rx, ry);
+	rotate(rr);
+	scale(rs);
+
+	textSize(20);
+	fill(255, 0, 0);
+	text("SAPM!", 0, 0)
+	pop();
+}
+
+/////////////////////////
+
+let evitar_s = false;
+function touchStarted() {
+
+	// evitar doble accion
+	if (evitar_s) return;
+  evitar_s = true;
+  setTimeout(function() {
+    evitar_s = false;
+  }, 200);
+
+	// evitar fuera de pantalla
+	if (
+		mouseX < 0 ||
+		mouseX > width ||
+		mouseY < 0 ||
+		mouseY > height
+	) return;
+
+	// guardar inicio touch
+	entrada_x = mouseX;
+	entrada_y = mouseY;
+
+	// iniciar touch
+	touch = true;
+	offset = 0;
+}
+
+/////////////////////////
+
+let touched = false;
+let evitar_e = false;
+function touchEnded() {
+
+	// evitar doble accion
+	if (evitar_e) return;
+  evitar_e = true;
+  setTimeout(function() {
+    evitar_e = false;
+  }, 200);
+
+	// teminar touch generico
+	offsetAcc += offset;
+	touch = false;
+
+	// evitar fuera de pantalla
+	if (
+		mouseX < 0 ||
+		mouseX > width ||
+		mouseY < 0 ||
+		mouseY > height
+	) return;
+
+	// PRIMER TOUCH VALIDADO
+	if (!touched) {
+		touched = true;
+		return;
+	}
+
+	// SEGUNDO TOUCH VALIDADO
+
+	// cambio funcion de dibujo
+	inicio = false;
+
+	// solicitud de fullscreen
+	if (document.documentElement.requestFullscreen) { // CHR (estandar)
+		document.documentElement.requestFullscreen();
+	}
+	else if (document.documentElement.webkitRequestFullscreen) { // SFI
+		document.documentElement.webkitRequestFullscreen();
+	}
+	else if (document.documentElement.mozRequestFullScreen) { // FFX
+		document.documentElement.mozRequestFullScreen();
+	}
+}
+
+/////////////////////////
+
+function adaptarCanvas() {
+
+	// tipo de viewport
+	const visual = window.visualViewport ? true : false;
+  
+	// medidas viewport
+	const vpt_w = visual ? window.visualViewport.width : window.innerWidth;
+	const vpt_h = visual ? window.visualViewport.height : window.innerHeight;
+
+	// calculo canvas
+	const cnv_w = 540; // mitad de 1080
+	const cnv_h = cnv_w * vpt_h / vpt_w;
+
+	// elementos del dom
+  const main = document.getElementById("contenedor-canvas");
+	const cnvs = document.getElementById("defaultCanvas0");
+	
+	// resize
+	resizeCanvas(cnv_w, cnv_h);
+	if (height > 980) offsetAcc = 980 - height;
+
+	// responsive
+	main.style.width = visual ? "100svw" : "100vw";
+	main.style.height = visual ? "100svh" : "100vh";
+  if (windowWidth * height > windowHeight * width) {
+    cnvs.style.height = visual ? "100svh" : "100vh";
+    cnvs.style.width = (100 / height) * width + (visual ? "svh" : "vh");
+  }
+  else {
+    cnvs.style.width = visual ? "100svw" : "100vw";
+    cnvs.style.height = (100 / width) * height + (visual ? "svw" : "vw");
+  }
+}
+
+/////////////////////////
+
+// eventos
+window.addEventListener('load', function() {
+
+	// cambio de dimensiones en ventana
+  window.addEventListener('resize', () => adaptarCanvas());
+
+	// prevenir default touch
+	document.addEventListener('touchstart', function(e) {
+		if (e.touches.length > 1) e.preventDefault(); // gestos touch multiple
+	}, { passive: false });
+
+	document.addEventListener('touchmove', function(e) {
+		e.preventDefault(); // "volver" o "cargar de nuevo"
+	}, { passive: false });
+
+	document.addEventListener('gesturestart', function(e) {
+		e.preventDefault(); // zoom
+	}, { passive: false });
+
+});
+
+/////////////////////////////////////////////
+
+		</script>
+  </body>
+</html>
