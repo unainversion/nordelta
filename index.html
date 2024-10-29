@@ -96,7 +96,7 @@ function preload() {
 function setup() {
 
 	createCanvas(540, 960).parent("contenedor-canvas"); // (temporal)
-	adaptarCanvas(); // resize y responsive (medidas definitivas)
+	adaptarCanvas(true); // resize y responsive (medidas definitivas)
 
 	imgFondo.width = width;
 	if (height > 980) offsetAcc = 980 - height;
@@ -244,7 +244,7 @@ function touchEnded() {
 
 /////////////////////////
 
-function adaptarCanvas() {
+function adaptarCanvas(manual = false) {
 	
 	// viewport
 	const visual = window.visualViewport ? true : false;
@@ -257,10 +257,20 @@ function adaptarCanvas() {
 	resizeCanvas(cnv_w, cnv_h);
 
 	// ajuste scroll
-	if (height > 980) offsetAcc = 980 - height;
+	if (cnv_h > 980) offsetAcc = 980 - height;
 	
 	// canvas responsive
 	const cnvs = document.getElementById("defaultCanvas0");
+
+	console.log("visual: " + visual);
+	console.log("vpt_w: " + vpt_w);
+	console.log("vpt_h: " + vpt_h);
+	console.log("cnv_w: " + cnv_w);
+	console.log("cnv_h: " + cnv_h);
+	console.log("cnvs:");
+	console.log(JSON.stringify(cnvs));
+
+
   if (windowWidth * height < windowHeight * width) {
 		cnvs.style.width = vpt_w + "px";
     cnvs.style.height = (vpt_w / cnv_w) * cnv_h + "px";
@@ -269,6 +279,9 @@ function adaptarCanvas() {
     cnvs.style.height = vpt_h + "px";
     cnvs.style.width = (vpt_h / cnv_h) * cnv_w + "px";
   }
+
+	if (manual) console.log("adaptarCanvas MANUAL");
+	else console.log("adaptarCanvas auto");
 }
 
 /////////////////////////
