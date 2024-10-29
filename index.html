@@ -96,7 +96,7 @@ function preload() {
 function setup() {
 
 	createCanvas(540, 960).parent("contenedor-canvas"); // (temporal)
-	adaptarCanvas(true); // resize y responsive (medidas definitivas)
+	adaptarCanvas(5); // resize y responsive (medidas definitivas)
 
 	imgFondo.width = width;
 	if (height > 980) offsetAcc = 980 - height;
@@ -244,7 +244,7 @@ function touchEnded() {
 
 /////////////////////////
 
-function adaptarCanvas(manual = false) {
+function adaptarCanvas(manual = 0) {
 	
 	// viewport
 	const visual = window.visualViewport ? true : false;
@@ -262,6 +262,7 @@ function adaptarCanvas(manual = false) {
 	// canvas responsive
 	const cnvs = document.getElementById("defaultCanvas0");
 
+	console.log(':::::::::::::::::::::::::::::::::');
 	console.log("visual: " + visual);
 	console.log("vpt_w: " + vpt_w);
 	console.log("vpt_h: " + vpt_h);
@@ -280,8 +281,8 @@ function adaptarCanvas(manual = false) {
     cnvs.style.width = (vpt_h / cnv_h) * cnv_w + "px";
   }
 
-	if (manual) console.log("adaptarCanvas MANUAL");
-	else console.log("adaptarCanvas auto");
+	console.log("adaptarCanvas MANUAL: " + manual);
+	console.log('"""""""""""""""""""""""""""""""""');
 }
 
 /////////////////////////
@@ -291,12 +292,12 @@ window.addEventListener('load', () => {
 
 	// cambio tamaño
 	const visual = window.visualViewport ? true : false;
-	if (visual) window.visualViewport.addEventListener('resize', adaptarCanvas);
-	else window.addEventListener('resize', adaptarCanvas);
+	if (visual) window.visualViewport.addEventListener('resize', () => adaptarCanvas(1));
+	else window.addEventListener('resize', () => adaptarCanvas(2));
 
 	// cambio fullscreen
-	document.addEventListener("fullscreenchange", adaptarCanvas);
-	document.addEventListener("webkitfullscreenchange", adaptarCanvas);
+	document.addEventListener("fullscreenchange", () => adaptarCanvas(3));
+	document.addEventListener("webkitfullscreenchange", () => adaptarCanvas(4));
 
 	// prevenir default touch: gestos touch multiple
 	document.addEventListener('touchstart', (e) => {
