@@ -269,13 +269,14 @@ function adaptarCanvas(manual = 0) {
 	resizeCanvas(cnv_w, cnv_h);
 
 	// ajuste scroll
-	if (cnv_h > 980) offsetAcc = 980 - height;
+	if (manual === 5 && cnv_h > 980) offsetAcc = 980 - cnv_h;
 	
 	// canvas responsive
 	const cnvs = document.getElementById("defaultCanvas0");
 
 	console.log(':::::::::::::::::::::::::::::::::');
 	console.log("adaptarCanvas MANUAL: " + manual);
+	console.log("offsetAcc: " + offsetAcc);
 	console.log("visual: " + visual);
 	console.log("vpt_w: " + vpt_w);
 	console.log("vpt_h: " + vpt_h);
