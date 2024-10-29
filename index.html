@@ -263,14 +263,15 @@ function adaptarCanvas(manual = 0) {
 	const cnvs = document.getElementById("defaultCanvas0");
 
 	console.log(':::::::::::::::::::::::::::::::::');
+	console.log("adaptarCanvas MANUAL: " + manual);
 	console.log("visual: " + visual);
 	console.log("vpt_w: " + vpt_w);
 	console.log("vpt_h: " + vpt_h);
 	console.log("cnv_w: " + cnv_w);
 	console.log("cnv_h: " + cnv_h);
 	console.log("cnvs:");
-	console.log(JSON.stringify(cnvs));
-
+	console.dir(cnvs);
+	console.log('"""""""""""""""""""""""""""""""""');
 
   if (windowWidth * height < windowHeight * width) {
 		cnvs.style.width = vpt_w + "px";
@@ -280,9 +281,6 @@ function adaptarCanvas(manual = 0) {
     cnvs.style.height = vpt_h + "px";
     cnvs.style.width = (vpt_h / cnv_h) * cnv_w + "px";
   }
-
-	console.log("adaptarCanvas MANUAL: " + manual);
-	console.log('"""""""""""""""""""""""""""""""""');
 }
 
 /////////////////////////
