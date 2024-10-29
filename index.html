@@ -24,8 +24,9 @@
 			rmt.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js";
 			rmt.onerror = function() {
 				const lcl = document.createElement("script");
-				lcl.onerror = null;
+				lcl.onerror = () => console.log("ERROR FATAL en p5.min.js carga local");
 				lcl.src = "p5.min.js";
+				console.log("ERROR: solucion => p5.min.js carga local");
 				document.head.appendChild(lcl);
 			};
 			document.head.appendChild(rmt);
@@ -52,7 +53,7 @@
   			justify-content: center;
   			align-items: center;
 
-				background-color: rgb(255, 255, 255);;
+				background-color: rgb(255, 255, 255);
 			}
 		 </style>
   </head>
@@ -78,22 +79,24 @@ let offsetAcc = 0;
 /////////////////////////
 
 function preload() {
-	imgFondo = loadImage("fondo.png");
-	imgDscto = loadImage("dscto.png");
+	const url = window.location;
+	const r_url = `${url.origin}${url.pathname.split('/').slice(0, 2).join('/')}`;
+
+	imgFondo = loadImage(r_url + "/fondo.png", null, () => {
+		imgFondo = loadImage("fondo.png");
+		console.log("ERROR: solucion => fondo.png carga local");
+	});
+
+	imgDscto = loadImage(r_url + "/dscto.png", null, () => {
+		imgDscto = loadImage("dscto.png");
+		console.log("ERROR: solucion => dscto.png carga local");
+	});
 }
 
 function setup() {
 
-	// medidas viewport
-	const vpt_w = window.innerWidth;
-	const vpt_h = window.innerHeight;
-
-	// calculo canvas
-	const cnv_w = 540; // mitad de 1080
-	const cnv_h = cnv_w * vpt_h / vpt_w;
-
-	createCanvas(cnv_w, cnv_h).parent("contenedor-canvas");
-	setTimeout(() => adaptarExterior(), 1); // resize y responsive
+	createCanvas(540, 960).parent("contenedor-canvas"); // (temporal)
+	adaptarCanvas(); // resize y responsive (medidas definitivas)
 
 	imgFondo.width = width;
 	if (height > 980) offsetAcc = 980 - height;
@@ -241,63 +244,60 @@ function touchEnded() {
 
 /////////////////////////
 
-function adaptarInterior() {
+function adaptarCanvas() {
 	
-	const vpt_w = window.innerWidth;
-	const vpt_h = window.innerHeight;
-
+	// viewport
+	const visual = window.visualViewport ? true : false;
+	const vpt_w = visual ? window.visualViewport.width : window.innerWidth;
+	const vpt_h = visual ? window.visualViewport.height : window.innerHeight;
+	
+	// canvas
 	const cnv_w = 540; // mitad de 1080
 	const cnv_h = cnv_w * vpt_h / vpt_w;
-
 	resizeCanvas(cnv_w, cnv_h);
+
+	// ajuste scroll
 	if (height > 980) offsetAcc = 980 - height;
-
-	adaptarExterior();
-}
-
-/////////////////////////
-
-function adaptarExterior() {
-
-  const main = document.getElementById("contenedor-canvas");
+	
+	// canvas responsive
 	const cnvs = document.getElementById("defaultCanvas0");
-
-	main.style.width = "100vw";
-	main.style.height = "100vh";
-
-  if (windowWidth * height > windowHeight * width) {
-    cnvs.style.height = "100vh";
-    cnvs.style.width = (100 / height) * width + "vh";
+  if (windowWidth * height < windowHeight * width) {
+		cnvs.style.width = vpt_w + "px";
+    cnvs.style.height = (vpt_w / cnv_w) * cnv_h + "px";
   }
   else {
-    cnvs.style.width = "100vw";
-    cnvs.style.height = (100 / width) * height + "vw";
+    cnvs.style.height = vpt_h + "px";
+    cnvs.style.width = (vpt_h / cnv_h) * cnv_w + "px";
   }
 }
 
 /////////////////////////
 
 // eventos
-window.addEventListener('load', function() {
+window.addEventListener('load', () => {
 
-	// cambio de dimensiones
-  window.addEventListener('resize', () => adaptarInterior());
+	// cambio tamaño
+	const visual = window.visualViewport ? true : false;
+	if (visual) window.visualViewport.addEventListener('resize', adaptarCanvas);
+	else window.addEventListener('resize', adaptarCanvas);
 
-	// cambio de fullscreen
-	document.addEventListener("fullscreenchange", () => adaptarInterior());
-	document.addEventListener("webkitfullscreenchange", () => adaptarInterior());
+	// cambio fullscreen
+	document.addEventListener("fullscreenchange", adaptarCanvas);
+	document.addEventListener("webkitfullscreenchange", adaptarCanvas);
 
-	// prevenir default touch
-	document.addEventListener('touchstart', function(e) {
-		if (e.touches.length > 1) e.preventDefault(); // gestos touch multiple
+	// prevenir default touch: gestos touch multiple
+	document.addEventListener('touchstart', (e) => {
+		if (e.touches.length > 1) e.preventDefault(); 
 	}, { passive: false });
 
-	document.addEventListener('touchmove', function(e) {
-		e.preventDefault(); // "volver" o "cargar de nuevo"
+	// prevenir default touch: "volver" o "cargar de nuevo"
+	document.addEventListener('touchmove', (e) => {
+		e.preventDefault();
 	}, { passive: false });
 
-	document.addEventListener('gesturestart', function(e) {
-		e.preventDefault(); // zoom
+	// prevenir default touch: zoom
+	document.addEventListener('gesturestart', (e) => {
+		e.preventDefault();
 	}, { passive: false });
 
 });
