@@ -105,6 +105,19 @@ function setup() {
 	textAlign(CENTER, CENTER);
 	textSize(14);
 	noStroke();
+
+	// eventos pantalla
+	setTimeout(() => {
+
+		// cambio medidas
+		const visual = window.visualViewport ? true : false;
+		if (visual) window.visualViewport.addEventListener('resize', () => adaptarCanvas(1));
+		else window.addEventListener('resize', () => adaptarCanvas(2));
+		
+		// cambio fullscreen
+		document.addEventListener("fullscreenchange", () => adaptarCanvas(3));
+		document.addEventListener("webkitfullscreenchange", () => adaptarCanvas(4));
+	}, 100);
 }
 
 /////////////////////////
@@ -114,7 +127,6 @@ function draw() {
 	// captura touch
 	if (touch) offset = entrada_y - mouseY;
 	else offset = 0;
-
 	scroll = offset + offsetAcc;
 	if (scroll < -500) {
 		scroll = -500;
@@ -285,33 +297,23 @@ function adaptarCanvas(manual = 0) {
 
 /////////////////////////
 
-// eventos
+// eventos default touch
 window.addEventListener('load', () => {
 
-	// cambio tamaño
-	const visual = window.visualViewport ? true : false;
-	if (visual) window.visualViewport.addEventListener('resize', () => adaptarCanvas(1));
-	else window.addEventListener('resize', () => adaptarCanvas(2));
-
-	// cambio fullscreen
-	document.addEventListener("fullscreenchange", () => adaptarCanvas(3));
-	document.addEventListener("webkitfullscreenchange", () => adaptarCanvas(4));
-
-	// prevenir default touch: gestos touch multiple
+	// prevenir gestos touch multiple
 	document.addEventListener('touchstart', (e) => {
 		if (e.touches.length > 1) e.preventDefault(); 
 	}, { passive: false });
 
-	// prevenir default touch: "volver" o "cargar de nuevo"
+	// prevenir "volver" o "cargar de nuevo"
 	document.addEventListener('touchmove', (e) => {
 		e.preventDefault();
 	}, { passive: false });
 
-	// prevenir default touch: zoom
+	// prevenir zoom
 	document.addEventListener('gesturestart', (e) => {
 		e.preventDefault();
 	}, { passive: false });
-
 });
 
 /////////////////////////////////////////////
