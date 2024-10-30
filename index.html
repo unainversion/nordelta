@@ -83,24 +83,12 @@ let imgFondo, imgDcto;
 
 function preload() {
 
-	// ruta a directorio raiz
-	const url = window.location;
-	const url_r = `${url.origin}${url.pathname.split('/').slice(0, 2).join('/')}`;
-
-	// carga remota (sino local)
-	imgFondo = loadImage(url_r + "/fondo.png", null, () => {
-		console.log("ERROR en carga remota de fondo.png");
-		console.log("SOLUCION: intentando carga local de fondo.png");
-		imgFondo = loadImage("fondo.png", null, () => {
-			console.log("ERROR en carga local de fondo.png ")
-		});
+	imgFondo = loadImage("fondo.png", null, () => {
+		console.log("ERROR en carga local de fondo.png")
 	});
-	imgDscto = loadImage(url_r + "/dscto.png", null, () => {
-		console.log("ERROR en carga remota de dscto.png");
-		console.log("SOLUCION: intentando carga local de dscto.png");
-		imgDscto = loadImage("dscto.png", null, () => {
-			console.log("ERROR en carga local de dscto.png ")
-		});
+
+	imgDscto = loadImage("dscto.png", null, () => {
+		console.log("ERROR en carga local de dscto.png")
 	});
 }
 
@@ -346,7 +334,7 @@ function retrasoAdaptarCanvas(_w, _retraso,) {
 	// caso base
   if (_retraso <= 0) {
     adaptarCanvas(_w, 5);
-		cargando = false;
+		setTimeout(() => requestAnimationFrame(() => cargando = false), 1);
     return; // salida
   }
   
