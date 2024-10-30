@@ -40,8 +40,6 @@
 				overflow: hidden;
 				box-sizing: border-box;
 				background-color: rgb(255, 255, 255);
-  			touch-action: manipulation;
-				user-select: none;
 			}
 
 			#contenedor-canvas {
@@ -54,12 +52,13 @@
 
   <body>
 		 <script>
+			console.log(window.visualViewport.height + "(ini)");
 			setInterval(() => console.log(window.visualViewport.height), 1);
 		 </script>
     <main id="contenedor-canvas">
     </main>
     <script>
-
+/*
 /////////////////////////////////////////////
 
 let cargando = true; // flag para loading (depende de requestAnimationFrame)
@@ -263,7 +262,7 @@ function touchEnded() {
 
 /////////////////////////
 
-// eventos default touch
+// default touch
 window.addEventListener('load', () => {
 
 	// prevenir gestos touch multiple
@@ -280,6 +279,12 @@ window.addEventListener('load', () => {
 	document.addEventListener('gesturestart', (e) => {
 		e.preventDefault();
 	}, { passive: false });
+
+	// quitar doble touch para zoom
+	document.body.style.touchAction = "manipulation";
+
+	// quitar touch mantenido para seleccion textual
+	document.body.style.userSelect = "none";
 });
 //
 // fin plantilla scroll
@@ -391,7 +396,7 @@ function adaptarCanvas(_w, _tipo = 0) {
 //
 // fin plantilla responsive
 //////////////////////////////////////////////////////
-
+*/
 		</script>
   </body>
 </html>
