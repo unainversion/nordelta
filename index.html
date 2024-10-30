@@ -360,6 +360,18 @@ function adaptarCanvas(_w, _tipo = 0) {
 		console.log("visual: " + visual);
 		console.log("vpt_w: " + vpt_w);
 		console.log("vpt_h: " + vpt_h + "  <--[ @@@ ]");
+
+		console.log(
+			"otros...",
+			window.innerHeight,
+			window.outerHeight,
+			document.documentElement.clientHeight,
+			document.body.clientHeight, 
+			window.visualViewport.height,
+			window.screen.height,
+			window.screen.availHeight
+		);
+		
 		console.log("cnv_w: " + cnv_w);
 		console.log("cnv_h: " + cnv_h);
 		console.log("cnvs:");
