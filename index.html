@@ -69,32 +69,32 @@
 
 /////////////////////////////////////////////
 
-let imgFondo, imgDcto;
-
-let inicio = true;
-
-let touch = false;
-let entrada_x, entrada_y;
+let inicio = true; // flag para estado (depende de touch, afecta a dibujo)
 
 let scroll = 0;
-let offset = 0;
-let offsetAcc = 0;
+let entrada_x, entrada_y;
+let desplazamientoAhora = 0;
+let desplazamientoAcumulado = 0;
+
+let imgFondo, imgDcto;
 
 /////////////////////////
 
 function preload() {
-	const url = window.location;
-	const r_url = `${url.origin}${url.pathname.split('/').slice(0, 2).join('/')}`;
 
-	imgFondo = loadImage(r_url + "/fondo.png", null, () => {
+	// ruta a directorio raiz
+	const url = window.location;
+	const url_r = `${url.origin}${url.pathname.split('/').slice(0, 2).join('/')}`;
+
+	// carga remota (sino local)
+	imgFondo = loadImage(url_r + "/fondo.png", null, () => {
 		console.log("ERROR en carga remota de fondo.png");
 		console.log("SOLUCION: intentando carga local de fondo.png");
 		imgFondo = loadImage("fondo.png", null, () => {
 			console.log("ERROR en carga local de fondo.png ")
 		});
 	});
-
-	imgDscto = loadImage(r_url + "/dscto.png", null, () => {
+	imgDscto = loadImage(url_r + "/dscto.png", null, () => {
 		console.log("ERROR en carga remota de dscto.png");
 		console.log("SOLUCION: intentando carga local de dscto.png");
 		imgDscto = loadImage("dscto.png", null, () => {
@@ -105,41 +105,38 @@ function preload() {
 
 function setup() {
 
-	createCanvas(540, 960).parent("contenedor-canvas"); // (temporal)
-	adaptarCanvas(5); // resize y responsive (medidas definitivas)
-	if (height > 980) offsetAcc = 980 - height;
+	// plantilla para pantalla vertical. buscar ctrl+f -> "*SeccionR"
+	canvasResponsive(540, "contenedor-canvas"); // args: ancho px, id contenedor
 
+	// corregir scroll inicial
+	if (height > 980) desplazamientoAcumulado = 980 - height;
+
+	// corregir medida imagene
 	imgFondo.width = width;
 
+	// ajustes generales
 	background(255);
 	textAlign(CENTER, CENTER);
 	textSize(14);
 	noStroke();
-
-	// evento cambio medidas
-	const visual = window.visualViewport ? true : false;
-	if (visual) window.visualViewport.addEventListener('resize', () => adaptarCanvas(1));
-	else window.addEventListener('resize', () => adaptarCanvas(2));
-	
-	// evento cambio fullscreen
-	document.addEventListener("fullscreenchange", () => adaptarCanvas(3));
-	document.addEventListener("webkitfullscreenchange", () => adaptarCanvas(4));
 }
 
 /////////////////////////
 
 function draw() {
 	
-	// captura touch
-	if (touch) offset = entrada_y - mouseY;
-	else offset = 0;
-	scroll = offset + offsetAcc;
+	// actualizar touch
+	if (mouseIsPressed) desplazamientoAhora = entrada_y - mouseY;
+	else desplazamientoAhora = 0;
+
+	// actualizar scroll
+	scroll = desplazamientoAhora + desplazamientoAcumulado;
 	if (scroll < -500) {
 		scroll = -500;
-		offsetAcc = -500;
+		desplazamientoAcumulado = -500;
 	}
 
-	// dibujos
+	// dibujos segun estado
 	if (inicio) dibujoInicio();
 	else dibujoSpam();
 }
@@ -183,9 +180,32 @@ function dibujoSpam() {
 	pop();
 }
 
+//////////////////////////////////////////////////////
+//
+// Bienvenidx a la "*SeccionS"
+// 
+// PLANTILLA SCROLL
+// para simular desplazamiento segun touch.
+// maneja estado de "incio" y apertura de fullscreen
+// 
+// FUNCIONES P5 (sugerencia: no modificar)
+// touchStarted
+// touchEnded
+// 
+// EVENTOS DEFAULT TOUCH
+// touchstart
+// touchmove
+// gesturestart
+//
+//////////////////////////////////////////////////////
+
+// flags especificas
+let touched = false;
+let evitar_s = false;
+let evitar_e = false;
+
 /////////////////////////
 
-let evitar_s = false;
 function touchStarted() {
 
 	// evitar doble accion
@@ -203,19 +223,14 @@ function touchStarted() {
 		mouseY > height
 	) return;
 
-	// guardar inicio touch
+	// inicio touch
 	entrada_x = mouseX;
 	entrada_y = mouseY;
-
-	// iniciar touch
-	touch = true;
-	offset = 0;
+	desplazamientoAhora = 0;
 }
 
 /////////////////////////
 
-let touched = false;
-let evitar_e = false;
 function touchEnded() {
 
 	// evitar doble accion
@@ -226,8 +241,7 @@ function touchEnded() {
   }, 200);
 
 	// teminar touch generico
-	offsetAcc += offset;
-	touch = false;
+	desplazamientoAcumulado += desplazamientoAhora;
 
 	// evitar fuera de pantalla
 	if (
@@ -240,7 +254,7 @@ function touchEnded() {
 	// PRIMER TOUCH VALIDADO
 	if (!touched) {
 		touched = true;
-		return; // <-- salida temprana
+		return; // salida
 	}
 
 	// SEGUNDO TOUCH VALIDADO
@@ -260,7 +274,66 @@ function touchEnded() {
 
 /////////////////////////
 
-function adaptarCanvas(manual = 0) {
+// eventos default touch
+window.addEventListener('load', () => {
+
+// prevenir gestos touch multiple
+document.addEventListener('touchstart', (e) => {
+	if (e.touches.length > 1) e.preventDefault(); 
+}, { passive: false });
+
+// prevenir "volver" o "cargar de nuevo"
+document.addEventListener('touchmove', (e) => {
+	e.preventDefault();
+}, { passive: false });
+
+// prevenir zoom
+document.addEventListener('gesturestart', (e) => {
+	e.preventDefault();
+}, { passive: false });
+});
+//
+// fin plantilla scroll
+//////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////
+//
+// Bienvenidx a la "*SeccionR"
+// 
+// PLANTILLA RESPONSIVE
+// para adaptar canvas a pantalla vertical
+// incluyendo cambios de fullscreen 
+// 
+// FUNCIONES GLOBALES (sugerencia: no modificar)
+// canvasResponsive
+// retrasoAdaptarCanvas
+// adaptarCanvas
+//
+//////////////////////////////////////////////////////
+
+function canvasResponsive(_w, _id) {
+	createCanvas(540, 960).parent("_id"); // medida temporal
+	retrasoAdaptarCanvas(10, _w); // medida definitiva, con retraso
+}
+
+/////////////////////////
+
+function retrasoAdaptarCanvas(retraso, _ancho) {
+
+	// caso base
+  if (retraso <= 0) {
+    adaptarCanvas(_ancho, 5);
+    return; // salida
+  }
+  
+	// pseudo recursion
+  requestAnimationFrame(() => delayAdaptarCanvas(retraso - 1, _ancho));
+}
+
+/////////////////////////
+
+function adaptarCanvas(_ancho, _tipo = 0) {
 	
 	// viewport
 	const visual = window.visualViewport ? true : false;
@@ -268,16 +341,16 @@ function adaptarCanvas(manual = 0) {
 	const vpt_h = visual ? window.visualViewport.height : window.innerHeight;
 	
 	// canvas
-	const cnv_w = 540; // mitad de 1080
+	const cnv_w = _ancho;
 	const cnv_h = cnv_w * vpt_h / vpt_w;
-	resizeCanvas(cnv_w, cnv_h);
+	resizeCanvas(cnv_w, cnv_h); // IMPORTANTE!!
 	
-	// canvas responsive
+	// manipular dom
 	const cnvs = document.getElementById("defaultCanvas0");
 
 	console.log(':::::::::::::::::::::::::::::::::');
-	console.log("adaptarCanvas MANUAL: ", manual, manual, manual, manual, manual);
-	console.log("offsetAcc: " + offsetAcc + " <--[ @ ]");
+	console.log("adaptarCanvas TIPO: ", _tipo, _tipo, _tipo, _tipo, _tipo);
+	console.log("offsetAcc: " + desplazamientoAcumulado + " <--[ @ ]");
 	console.log("visual: " + visual);
 	console.log("vpt_w: " + vpt_w);
 	console.log("vpt_h: " + vpt_h + "  <--[ @@@ ]");
@@ -286,7 +359,7 @@ function adaptarCanvas(manual = 0) {
 	console.log("cnvs:");
 	console.dir(cnvs);
 	console.log('"""""""""""""""""""""""""""""""""');
-
+	
   if (windowWidth * height < windowHeight * width) {
 		cnvs.style.width = vpt_w + "px";
     cnvs.style.height = (vpt_w / cnv_w) * cnv_h + "px";
@@ -296,29 +369,9 @@ function adaptarCanvas(manual = 0) {
     cnvs.style.width = (vpt_h / cnv_h) * cnv_w + "px";
   }
 }
-
-/////////////////////////
-
-// eventos default touch
-window.addEventListener('load', () => {
-
-	// prevenir gestos touch multiple
-	document.addEventListener('touchstart', (e) => {
-		if (e.touches.length > 1) e.preventDefault(); 
-	}, { passive: false });
-
-	// prevenir "volver" o "cargar de nuevo"
-	document.addEventListener('touchmove', (e) => {
-		e.preventDefault();
-	}, { passive: false });
-
-	// prevenir zoom
-	document.addEventListener('gesturestart', (e) => {
-		e.preventDefault();
-	}, { passive: false });
-});
-
-/////////////////////////////////////////////
+//
+// fin plantilla responsive
+//////////////////////////////////////////////////////
 
 		</script>
   </body>
