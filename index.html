@@ -277,20 +277,20 @@ function touchEnded() {
 // eventos default touch
 window.addEventListener('load', () => {
 
-// prevenir gestos touch multiple
-document.addEventListener('touchstart', (e) => {
-	if (e.touches.length > 1) e.preventDefault(); 
-}, { passive: false });
+	// prevenir gestos touch multiple
+	document.addEventListener('touchstart', (e) => {
+		if (e.touches.length > 1) e.preventDefault(); 
+	}, { passive: false });
 
-// prevenir "volver" o "cargar de nuevo"
-document.addEventListener('touchmove', (e) => {
-	e.preventDefault();
-}, { passive: false });
+	// prevenir "volver" o "cargar de nuevo"
+	document.addEventListener('touchmove', (e) => {
+		e.preventDefault();
+	}, { passive: false });
 
-// prevenir zoom
-document.addEventListener('gesturestart', (e) => {
-	e.preventDefault();
-}, { passive: false });
+	// prevenir zoom
+	document.addEventListener('gesturestart', (e) => {
+		e.preventDefault();
+	}, { passive: false });
 });
 //
 // fin plantilla scroll
@@ -313,62 +313,78 @@ document.addEventListener('gesturestart', (e) => {
 //////////////////////////////////////////////////////
 
 function canvasResponsive(_w, _id) {
-	createCanvas(540, 960).parent(_id); // medida temporal
-	retrasoAdaptarCanvas(10, _w); // medida definitiva, con retraso
+
+	// IMPORTANTE!! medidas canvas...
+	createCanvas(540, 960).parent(_id); // ...temporal
+	retrasoAdaptarCanvas(_w, 10); // ... definitiva (con retraso)
+
+	// evento cambio tamaño
+	if (window.visualViewport) { // excluyente de interfaces superpuestas
+		window.visualViewport.addEventListener('resize', () => adaptarCanvas(_w, 1));
+	}
+	else { // en caso de no tener visual: viewport estandar
+		window.addEventListener('resize', () => adaptarCanvas(_w, 2));
+	}
+
+	// evento cambio fullscreen
+	document.addEventListener("fullscreenchange", () => adaptarCanvas(_w, 3));
+	document.addEventListener("webkitfullscreenchange", () => adaptarCanvas(_w, 4));
 }
 
 /////////////////////////
 
-function retrasoAdaptarCanvas(retraso, _ancho) {
-	console.log("retrasoAdaptarCanvas:", retraso)
+function retrasoAdaptarCanvas(_w, _retraso,) {
+	console.log("retrasoAdaptarCanvas:", _retraso)
 
 	// caso base
-  if (retraso <= 0) {
-    adaptarCanvas(_ancho, 5);
+  if (_retraso <= 0) {
+    adaptarCanvas(_w, 5);
     return; // salida
   }
   
 	// pseudo recursion
-  requestAnimationFrame(() => retrasoAdaptarCanvas(retraso - 1, _ancho));
+  requestAnimationFrame(() => retrasoAdaptarCanvas(_w, _retraso - 1));
 }
 
 /////////////////////////
 
-function adaptarCanvas(_ancho, _tipo = 0) {
-	
-	// viewport
-	const visual = window.visualViewport ? true : false;
-	const vpt_w = visual ? window.visualViewport.width : window.innerWidth;
-	const vpt_h = visual ? window.visualViewport.height : window.innerHeight;
-	
-	// canvas
-	const cnv_w = _ancho;
-	const cnv_h = cnv_w * vpt_h / vpt_w;
-	resizeCanvas(cnv_w, cnv_h); // IMPORTANTE!!
-	
-	// manipular dom
-	const cnvs = document.getElementById("defaultCanvas0");
+function adaptarCanvas(_w, _tipo = 0) {
+	requestAnimationFrame(() => {
 
-	console.log(':::::::::::::::::::::::::::::::::');
-	console.log("adaptarCanvas TIPO: ", _tipo, _tipo, _tipo, _tipo, _tipo);
-	console.log("offsetAcc: " + desplazamientoAcumulado + " <--[ @ ]");
-	console.log("visual: " + visual);
-	console.log("vpt_w: " + vpt_w);
-	console.log("vpt_h: " + vpt_h + "  <--[ @@@ ]");
-	console.log("cnv_w: " + cnv_w);
-	console.log("cnv_h: " + cnv_h);
-	console.log("cnvs:");
-	console.dir(cnvs);
-	console.log('"""""""""""""""""""""""""""""""""');
-	
-  if (windowWidth * height < windowHeight * width) {
-		cnvs.style.width = vpt_w + "px";
-    cnvs.style.height = (vpt_w / cnv_w) * cnv_h + "px";
-  }
-  else {
-    cnvs.style.height = vpt_h + "px";
-    cnvs.style.width = (vpt_h / cnv_h) * cnv_w + "px";
-  }
+		// viewport
+		const visual = window.visualViewport ? true : false;
+		const vpt_w = visual ? window.visualViewport.width : window.innerWidth;
+		const vpt_h = visual ? window.visualViewport.height : window.innerHeight;
+		
+		// canvas
+		const cnv_w = _w;
+		const cnv_h = cnv_w * vpt_h / vpt_w;
+		resizeCanvas(cnv_w, cnv_h); // IMPORTANTE!!
+		
+		// manipular dom
+		const cnvs = document.getElementById("defaultCanvas0");
+
+		console.log(':::::::::::::::::::::::::::::::::');
+		console.log("adaptarCanvas TIPO: ", _tipo, _tipo, _tipo, _tipo, _tipo);
+		console.log("offsetAcc: " + desplazamientoAcumulado + " <--[ @ ]");
+		console.log("visual: " + visual);
+		console.log("vpt_w: " + vpt_w);
+		console.log("vpt_h: " + vpt_h + "  <--[ @@@ ]");
+		console.log("cnv_w: " + cnv_w);
+		console.log("cnv_h: " + cnv_h);
+		console.log("cnvs:");
+		console.dir(cnvs);
+		console.log('"""""""""""""""""""""""""""""""""');
+		
+		if (windowWidth * height < windowHeight * width) {
+			cnvs.style.width = vpt_w + "px";
+			cnvs.style.height = (vpt_w / cnv_w) * cnv_h + "px";
+		}
+		else {
+			cnvs.style.height = vpt_h + "px";
+			cnvs.style.width = (vpt_h / cnv_h) * cnv_w + "px";
+		}
+	});
 }
 //
 // fin plantilla responsive
