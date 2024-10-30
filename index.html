@@ -69,6 +69,7 @@
 
 /////////////////////////////////////////////
 
+let cargando = true; // flag para loading (depende de requestAnimationFrame)
 let inicio = true; // flag para estado (depende de touch, afecta a dibujo)
 
 let scroll = 0;
@@ -124,6 +125,12 @@ function setup() {
 /////////////////////////
 
 function draw() {
+
+	// pantalla loading
+	if (cargando) {
+		background(255);
+		return; // salida
+	}
 	
 	// actualizar touch
 	if (mouseIsPressed) desplazamientoAhora = entrada_y - mouseY;
@@ -144,17 +151,18 @@ function draw() {
 /////////////////////////
 
 function dibujoInicio() {
-	
-	// fondo principal
 	background(255);
-
+		
+	// fondo principal
 	image(imgFondo, 0, -scroll);
 	
+	// parpadeo descuento
 	push();
 	tint(255, (sin(millis() * 0.004) + 1) * 127);
 	image(imgDscto, 270, 764 - scroll);
 	pop();
 	
+	// repeticion imagen abajo
 	if (scroll < 600) return;
 	image(imgFondo, 0, imgFondo.height - scroll);
 }
@@ -164,16 +172,15 @@ function dibujoInicio() {
 function dibujoSpam() {
 	background(0, 255, 255, 10);
 
+	// letras random
 	const rx = random(width);
 	const ry = random(height);
 	const rr = random(-PI, PI);
 	const rs = random(0.5, 5);
-
 	push();
 	translate(rx, ry);
 	rotate(rr);
 	scale(rs);
-
 	textSize(20);
 	fill(255, 0, 0);
 	text("SAPM!", 0, 0)
@@ -339,6 +346,7 @@ function retrasoAdaptarCanvas(_w, _retraso,) {
 	// caso base
   if (_retraso <= 0) {
     adaptarCanvas(_w, 5);
+		cargando = false;
     return; // salida
   }
   
