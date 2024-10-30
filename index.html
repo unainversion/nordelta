@@ -23,10 +23,11 @@
 			const rmt = document.createElement("script");
 			rmt.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js";
 			rmt.onerror = function() {
+				console.log("ERROR en carga remota de p5.min.js");
+				console.log("SOLUCION: intentando carga local de p5.min.js");
 				const lcl = document.createElement("script");
-				lcl.onerror = () => console.log("ERROR FATAL en p5.min.js carga local");
+				lcl.onerror = () => console.log("ERROR en carga local de p5.min.js");
 				lcl.src = "p5.min.js";
-				console.log("ERROR: solucion => p5.min.js carga local");
 				document.head.appendChild(lcl);
 			};
 			document.head.appendChild(rmt);
@@ -59,6 +60,9 @@
   </head>
 
   <body>
+		 <script>
+			setInterval(() => console.log(window.visualViewport.height), 1);
+		 </script>
     <main id="contenedor-canvas">
     </main>
     <script>
@@ -83,13 +87,19 @@ function preload() {
 	const r_url = `${url.origin}${url.pathname.split('/').slice(0, 2).join('/')}`;
 
 	imgFondo = loadImage(r_url + "/fondo.png", null, () => {
-		imgFondo = loadImage("fondo.png");
-		console.log("ERROR: solucion => fondo.png carga local");
+		console.log("ERROR en carga remota de fondo.png");
+		console.log("SOLUCION: intentando carga local de fondo.png");
+		imgFondo = loadImage("fondo.png", null, () => {
+			console.log("ERROR en carga local de fondo.png ")
+		});
 	});
 
 	imgDscto = loadImage(r_url + "/dscto.png", null, () => {
-		imgDscto = loadImage("dscto.png");
-		console.log("ERROR: solucion => dscto.png carga local");
+		console.log("ERROR en carga remota de dscto.png");
+		console.log("SOLUCION: intentando carga local de dscto.png");
+		imgDscto = loadImage("dscto.png", null, () => {
+			console.log("ERROR en carga local de dscto.png ")
+		});
 	});
 }
 
@@ -97,27 +107,23 @@ function setup() {
 
 	createCanvas(540, 960).parent("contenedor-canvas"); // (temporal)
 	adaptarCanvas(5); // resize y responsive (medidas definitivas)
+	if (height > 980) offsetAcc = 980 - height;
 
 	imgFondo.width = width;
-	if (height > 980) offsetAcc = 980 - height;
 
 	background(255);
 	textAlign(CENTER, CENTER);
 	textSize(14);
 	noStroke();
 
-	// eventos pantalla
-	setTimeout(() => {
-
-		// cambio medidas
-		const visual = window.visualViewport ? true : false;
-		if (visual) window.visualViewport.addEventListener('resize', () => adaptarCanvas(1));
-		else window.addEventListener('resize', () => adaptarCanvas(2));
-		
-		// cambio fullscreen
-		document.addEventListener("fullscreenchange", () => adaptarCanvas(3));
-		document.addEventListener("webkitfullscreenchange", () => adaptarCanvas(4));
-	}, 100);
+	// evento cambio medidas
+	const visual = window.visualViewport ? true : false;
+	if (visual) window.visualViewport.addEventListener('resize', () => adaptarCanvas(1));
+	else window.addEventListener('resize', () => adaptarCanvas(2));
+	
+	// evento cambio fullscreen
+	document.addEventListener("fullscreenchange", () => adaptarCanvas(3));
+	document.addEventListener("webkitfullscreenchange", () => adaptarCanvas(4));
 }
 
 /////////////////////////
@@ -234,12 +240,10 @@ function touchEnded() {
 	// PRIMER TOUCH VALIDADO
 	if (!touched) {
 		touched = true;
-		return;
+		return; // <-- salida temprana
 	}
 
 	// SEGUNDO TOUCH VALIDADO
-
-	// cambio funcion de dibujo
 	inicio = false;
 
 	// solicitud de fullscreen
@@ -267,9 +271,6 @@ function adaptarCanvas(manual = 0) {
 	const cnv_w = 540; // mitad de 1080
 	const cnv_h = cnv_w * vpt_h / vpt_w;
 	resizeCanvas(cnv_w, cnv_h);
-
-	// ajuste scroll
-	if (manual === 5 && cnv_h > 980) offsetAcc = 980 - cnv_h;
 	
 	// canvas responsive
 	const cnvs = document.getElementById("defaultCanvas0");
