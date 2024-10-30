@@ -64,6 +64,7 @@ setInterval(() => console.log(window.visualViewport.height), 1);
 // bug p5.js
 let errorHeight = false;
 if (window.innerHeight > window.screen.availHeight) {
+	console.log("!!! ERROR P5 ___innHei:", window.innerHeight, " ___scr.avHe:", window.screen.availHeight);
 	errorHeight = true;
 }
 
