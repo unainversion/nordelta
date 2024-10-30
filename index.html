@@ -4,7 +4,7 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Nordelta</title>
-    <!-- <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
 		<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'>
 		<style> .cs { stroke: rgb(9, 9, 9); stroke-width: 2; } </style>
 		<style> .bl { fill: rgb(255, 255, 255); } </style>
@@ -17,9 +17,9 @@
 		<circle cx='20' cy='12.67' r='10' class='cs bl'/>
 		<circle cx='40' cy='47.32' r='10' class='cs bl'/>
 		<circle cx='20' cy='47.32' r='10' class='cs bl'/> 
-		</svg>"> -->
+		</svg>">
 
-		<!-- <script>
+		<script>
 			const rmt = document.createElement("script");
 			rmt.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.min.js";
 			rmt.onerror = function() {
@@ -31,9 +31,7 @@
 				document.head.appendChild(lcl);
 			};
 			document.head.appendChild(rmt);
-		</script> -->
-
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.10.0/p5.js"></script>
+		</script>
 
 		<style>
 			body {
@@ -53,20 +51,24 @@
   </head>
 
   <body>
-		 <script>
-			console.log(window.visualViewport.height + "(ini)");
-			setInterval(() => console.log(window.visualViewport.height), 1);
-		 </script>
     <main id="contenedor-canvas">
     </main>
     <script>
 
-window.addEventListener("load", () => {
-	document.getElementById("contenedor-canvas").innerText = window.visualViewport.height;
-});
-
-/*
 /////////////////////////////////////////////
+
+// test
+console.log(window.visualViewport.height + "(ini)");
+setInterval(() => console.log(window.visualViewport.height), 1);
+
+// bug p5.js
+let errorHeight = false;
+if (window.innerHeight > window.screen.availHeight) {
+	errorHeight = true;
+}
+
+/////////////////////////////////////////////
+// SKETCH:
 
 let cargando = true; // flag para loading (depende de requestAnimationFrame)
 let inicio = true; // flag para estado (depende de touch, afecta a dibujo)
@@ -76,7 +78,7 @@ let entrada_x, entrada_y;
 let desplazamientoAhora = 0;
 let desplazamientoAcumulado = 0;
 
-let imgFondo, imgDcto;
+let imgFondo, imgDscto;
 
 /////////////////////////
 
@@ -187,15 +189,17 @@ function dibujoSpam() {
 // touchStarted
 // touchEnded
 // 
-// EVENTOS DEFAULT TOUCH
-// touchstart
-// touchmove
-// gesturestart
+// DEFAULT TOUCH
+// touchstart (evento)
+// touchmove (evento)
+// gesturestart (evento)
+// touchAction (css)
+// userSelect (css)
 //
 //////////////////////////////////////////////////////
 
 // flags especificas
-let touched = false;
+let primerTouch = false;
 let evitar_s = false;
 let evitar_e = false;
 
@@ -247,8 +251,8 @@ function touchEnded() {
 	) return;
 
 	// PRIMER TOUCH VALIDADO
-	if (!touched) {
-		touched = true;
+	if (!primerTouch) {
+		primerTouch = true;
 		return; // salida
 	}
 
@@ -270,20 +274,20 @@ function touchEnded() {
 /////////////////////////
 
 // default touch
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
 
 	// prevenir gestos touch multiple
-	document.addEventListener('touchstart', (e) => {
+	document.addEventListener("touchstart", (e) => {
 		if (e.touches.length > 1) e.preventDefault(); 
 	}, { passive: false });
 
 	// prevenir "volver" o "cargar de nuevo"
-	document.addEventListener('touchmove', (e) => {
+	document.addEventListener("touchmove", (e) => {
 		e.preventDefault();
 	}, { passive: false });
 
 	// prevenir zoom
-	document.addEventListener('gesturestart', (e) => {
+	document.addEventListener("gesturestart", (e) => {
 		e.preventDefault();
 	}, { passive: false });
 
@@ -317,14 +321,14 @@ function canvasResponsive(_w, _id) {
 
 	// IMPORTANTE!! medidas canvas...
 	createCanvas(540, 960).parent(_id); // ...temporal
-	retrasoAdaptarCanvas(_w, 10); // ... definitiva (con retraso)
+	retrasoAdaptarCanvas(_w, 10); // ...definitiva (con retraso)
 
 	// evento cambio tamaño
 	if (window.visualViewport) { // excluyente de interfaces superpuestas
-		window.visualViewport.addEventListener('resize', () => adaptarCanvas(_w, 1));
+		window.visualViewport.addEventListener("resize", () => adaptarCanvas(_w, 1));
 	}
 	else { // en caso de no tener visual: viewport estandar
-		window.addEventListener('resize', () => adaptarCanvas(_w, 2));
+		window.addEventListener("resize", () => adaptarCanvas(_w, 2));
 	}
 
 	// evento cambio fullscreen
@@ -356,8 +360,9 @@ function adaptarCanvas(_w, _tipo = 0) {
 		// viewport
 		const visual = window.visualViewport ? true : false;
 		const vpt_w = visual ? window.visualViewport.width : window.innerWidth;
-		const vpt_h = visual ? window.visualViewport.height : window.innerHeight;
-		
+		let vpt_h = visual ? window.visualViewport.height : window.innerHeight;
+		if (errorHeight) vpt_h = window.screen.availHeight * 0.94;
+
 		// canvas
 		const cnv_w = _w;
 		const cnv_h = cnv_w * vpt_h / vpt_w;
@@ -366,7 +371,7 @@ function adaptarCanvas(_w, _tipo = 0) {
 		// manipular dom
 		const cnvs = document.getElementById("defaultCanvas0");
 
-		console.log(':::::::::::::::::::::::::::::::::');
+		console.log(":::::::::::::::::::::::::::::::::");
 		console.log("adaptarCanvas TIPO: ", _tipo, _tipo, _tipo, _tipo, _tipo);
 		console.log("offsetAcc: " + desplazamientoAcumulado + " <--[ @ ]");
 		console.log("visual: " + visual);
@@ -403,7 +408,7 @@ function adaptarCanvas(_w, _tipo = 0) {
 //
 // fin plantilla responsive
 //////////////////////////////////////////////////////
-*/
+
 		</script>
   </body>
 </html>
