@@ -313,13 +313,14 @@ document.addEventListener('gesturestart', (e) => {
 //////////////////////////////////////////////////////
 
 function canvasResponsive(_w, _id) {
-	createCanvas(540, 960).parent("_id"); // medida temporal
+	createCanvas(540, 960).parent(_id); // medida temporal
 	retrasoAdaptarCanvas(10, _w); // medida definitiva, con retraso
 }
 
 /////////////////////////
 
 function retrasoAdaptarCanvas(retraso, _ancho) {
+	console.log("retrasoAdaptarCanvas:", retraso)
 
 	// caso base
   if (retraso <= 0) {
@@ -328,7 +329,7 @@ function retrasoAdaptarCanvas(retraso, _ancho) {
   }
   
 	// pseudo recursion
-  requestAnimationFrame(() => delayAdaptarCanvas(retraso - 1, _ancho));
+  requestAnimationFrame(() => retrasoAdaptarCanvas(retraso - 1, _ancho));
 }
 
 /////////////////////////
